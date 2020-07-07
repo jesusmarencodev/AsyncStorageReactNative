@@ -1,21 +1,73 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
+import AsyncStorage from '@react-native-community/async-storage'
 import { StyleSheet, Text, View, TextInput, Button, TouchableHighlight } from 'react-native'
 
 const App = () => {
+
+    const [inputText, setInputText] = useState('')
+    const [nameStorage, setNameStorage] = useState('')
+
+
+    useEffect(() => {
+        getDataStorage();
+    },[])
+
+
+    const saveData = async() =>{
+        try {
+            await AsyncStorage.setItem('name', inputText)
+            setNameStorage(inputText)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const getDataStorage = async () => {
+        try {
+            const name = await AsyncStorage.getItem('name');
+            setNameStorage(name)
+            console.log(nameStorage)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const deleteData = async () => {
+        try {
+            await AsyncStorage.removeItem('name')
+            setNameStorage('')
+            setInputText('')
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
+
   return (
    
     <View style={styles.container}>
+        { nameStorage ? <Text>Hola {nameStorage}</Text> : null }
+        
         <TextInput 
             style={styles.input}
             placeholder="Escribe tu nombre"
+            onChangeText = {text => setInputText(text)}
+            value={inputText}
         />
         <Button
             title="Guardar"
             color='#333'
+            onPress={()=> saveData()}
         />
-        <TouchableHighlight style={styles.btnDelete}>
-            <Text style={styles.deleteText}>Eliminar Nombre &times;</Text>
-        </TouchableHighlight>
+        {nameStorage ? (
+            <TouchableHighlight
+                style={styles.btnDelete}
+                onPress={()=> deleteData()}
+            >
+                <Text style={styles.deleteText}>Eliminar Nombre &times;</Text>
+            </TouchableHighlight>
+        ) : null}
     </View>
   )
 }
